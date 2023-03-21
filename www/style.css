@@ -44,5 +44,22 @@
       margin-bottom: 5px;
       padding: 5px;
       border-radius: 5px;
-      background-color: #f2837b;
+      background-color: var(--clr);
+    }
+
+    #notification-container{
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      z-index: 2;
+      background-color: aliceblue;
+      /* height: 75px; */
+      padding: 20%;
+      transform: translate(-50%, -50%);
+      display: none;
+    }
+
+    .buttons{
+      display: flex;
+      justify-content: space-between;
     }
