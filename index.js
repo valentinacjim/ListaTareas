@@ -19,12 +19,15 @@ const sendResponse = (response, content, contentType) => {
 
 const handleRequest = async (request, response) => {
   const url = request.url;
-
   if(request.method === "GET"){
     let content;
     let contentType;
     switch(url){
-      case "/":
+      case "../tasks.json":
+        content = await serveStaticFile("/tasks.json");
+        contentType = "application/json";
+        break;
+
       case "/index.html":
         content = await serveStaticFile("www/index.html");
         contentType = "text/html";
@@ -43,7 +46,8 @@ const handleRequest = async (request, response) => {
     }
 
      sendResponse(response, content, contentType);
-  } else{
+  }
+  else{
      response.writeHead(405, {"Content-Type": "text/html"});
      response.write(`M&eacutetodo ${request.method} no permitido!\r\n`);
   }
