@@ -16,11 +16,21 @@ const add_task = () => {
      <h3>${task.title}</h3>
      </div>
     `;	
+
+
     
     // let taskContainer = document.querySelector(".task-container");
 
     // console.log(task.title);   
+  }
+  );
+  let items = document.querySelectorAll(".task-container");
+  items.forEach((item) => {
+    item.addEventListener('touchstart', handleTouchStart(item), false); 
+    item.addEventListener('touchmove', handleTouchMove(item), false); 
+    item.addEventListener('touchend', handleTouchEnd(item), false);
   });
+
 
 }
 
@@ -29,12 +39,10 @@ async function loadTasks() {
   const data = await response.json();
   data.forEach((task) => {
     taskList.push(task);
-    console.log(taskList);
   });
 }
 
 const add = () => {
-  desativarTouch = true;
   task_name = document.querySelector("#task-name").value;
   console.log(task_name);
 
@@ -62,38 +70,37 @@ const add = () => {
   console.log(taskList);
 }
 
-const remove = () => {
+const remove = (item) => {
   console.log('remove');
   for (let i = 0; i < taskList.length; i++) {
     console.log(taskList[i].title);
-    console.log(target.innerHTML);
-    if (taskList[i].title === target.innerHTML) {
+    console.log(item.innerHTML);
+    if (taskList[i].title === item.innerHTML.slice(10,-11)) {
       taskList.splice(i, 1);
     }
   }
   add_task();
-  notification();
+  notification(item);
   
   
 
 }
 
-const toggleDone = () => {
-  console.log(target.style.backgroundColor);
+const toggleDone = (item) => {
+  console.log(item.style.backgroundColor);
   taskList.forEach((task) => {
-    console.log(task.title);
-    console.log(target.innerHTML.slice(10,-11));
-    if (task.title == target.innerHTML.slice(10,-11)){
+    // console.log(task.title);
+    if (task.title == item.innerHTML.slice(10,-11)){
 
       console.log(task.done);
       task.done = !task.done;
     }
     // console.log(task.done);
     if (task.done == true){
-      target.style.backgroundColor = "rgb(172, 242, 161)";
+      item.style.backgroundColor = "rgb(172, 242, 161)";
     }
     else{
-      target.style.backgroundColor = "#f2837b";
+      item.style.backgroundColor = "#f2837b";
     }
 
   }
@@ -118,29 +125,20 @@ const notification_container = document.querySelector("#notification-container")
 // const toggleButton = document.querySelector("#fab-toggle");
 
 addButton.addEventListener("touchend", add);
-removeButton.addEventListener("touchend", remove);
-cancelButton.addEventListener("touchend", notification);  
+
 
 load();
 // console.log(taskList);
 
 
-document.addEventListener('touchstart', handleTouchStart, false); 
-document.addEventListener('touchmove', handleTouchMove, false); 
-document.addEventListener('touchend', handleTouchEnd, false);
 var xDown = null; 
-var yDown = null; 
-var target = null;
-var desativarTouch = false;
 var touchTime = null;
 
 function getTouches(evt) { 
-  if (desativarTouch == false){
-    console.log(evt)
-    return evt.touches 
-  }
+    return evt.touches   
 }
-function check_time(){
+
+function check_time(item){
   if (touchTime === null){return;}
   // console.log(touchTime);
   // console.log(Date.now());
@@ -153,71 +151,63 @@ function check_time(){
     return;
   }
   if(diff > 100){
-    target.style.backgroundColor = "rgb(190, 242, 161)";
+    
+    item.style.backgroundColor = "rgb(190, 242, 161)";
   }
-  setTimeout(check_time, 100);
+  setTimeout(check_time, 50);
 
 }
-function handleTouchStart(evt)
+function handleTouchStart(item, evt)
   { 
-    if (desativarTouch == false){
     const firstTouch = getTouches(evt)[0]; 
     xDown = firstTouch.clientX; 
-    yDown = firstTouch.clientY;
     touchTime = Date.now();
-    target = evt.target;
-    // target = substring(target.substring(5,-5)
-    setTimeout(check_time, 100);
+    setTimeout(check_time(item), 50);
     
-    }
+    
   };
 
 function handleTouchEnd(){
-  if (desativarTouch == false){
     touchTime = null;
     // console.log(target.done);
     add_task();
-    target = null;
     
-  }
 }
 
-function handleTouchMove(evt) { 
-  if ( ! xDown || ! yDown ) 
+function handleTouchMove(item, evt) { 
+  if ( ! xDown ) 
     { return; } 
   var xUp = evt.touches[0].clientX; 
-  var yUp = evt.touches[0].clientY; 
+  console.log(xUp);
+  console.log(xDown);
   var xDiff = xDown - xUp; 
-  var yDiff = yDown - yUp; 
-  if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) 
-  {/*most significant*/ if ( xDiff > 0 ) 
-    { /* left swipe */
-      console.log("swipe left"); } 
-    else 
+  if ( xDiff < -10 ) 
     { /* right swipe */ 
-    console.log("swipe right");
-    notification()} } 
-    else 
-    { if ( yDiff > 0 ) 
-      { /* up swipe */ 
-      console.log("swipe up");}
-       
-    else { /* down swipe */
-    console.log("swipe down");
-         } 
-      }
-    
+    console.log("right swipe");
+    notification(item)
+    touchTime = null;}  
     /* reset values */ 
-    xDown = null; 
-    yDown = null; };
+  xDown = null; 
+  console.log(xDown);
+};
 
-function notification(){
+function notification(item){
   if (notification_container.style.display == "block"){
     notification_container.style.display = "none";
-    desativarTouch = false;
-    target = null;
+    removeButton.addEventListener("touchend", remove(item));
+    cancelButton.addEventListener("touchend", notification(item));  
+    taskList.forEach((task) => {
+      if (task.done == true){
+        item.style.backgroundColor = "rgb(172, 242, 161)";
+      }
+      else{
+        item.style.backgroundColor = "#f2837b";
+      }
+  
+    }
+    );
     return;
   }
-  desativarTouch = true;
-  notification_container.style.display = "block";
+  notification_container.style.display = "block"
+  item.style.backgroundColor = "rgb(190, 242, 161)";
 }
